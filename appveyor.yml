@@ -1,0 +1,32 @@
+version: 0.6.{branch}.{build}
+
+image: Visual Studio 2017
+
+pull_requests:
+  do_not_increment_build_number: true
+
+skip_non_tags: true
+
+max_jobs: 1
+
+configuration: Release
+
+platform: x64
+
+shallow_clone: true
+
+clone_depth: 1
+
+before_build:
+  - git clone https://github.com/mitsuba-renderer/dependencies_win64 dependencies
+  - pip install -U setuptools
+  - pip install pypiwin32 wheel
+  - pip install scons==2.5.1
+  - scons --version
+
+build:
+  project: build\mitsuba-msvc2017.sln
+  parallel: true
+  verbosity: minimal
+
+test: off
