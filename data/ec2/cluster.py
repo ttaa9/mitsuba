@@ -89,7 +89,7 @@ def parse_timestamp(s):
     else:
       values["microsecond"] = values["microsecond"][1:]
       values["microsecond"] += "0" * (6 - len(values["microsecond"]))
-    values = dict((k, int(v)) for k, v in values.iteritems()
+    values = dict((k, int(v)) for k, v in values.items()
                   if not k.startswith("tz"))
     try:
       return datetime.datetime(**values), tz
@@ -98,7 +98,7 @@ def parse_timestamp(s):
   return None, None
 		
 def addNodes(instanceType, nodeCount, groupName):
-	print('Booting %i nodes of type %s (group name = "%s") ..' % (nodeCount, instanceType, groupName))
+	print(('Booting %i nodes of type %s (group name = "%s") ..' % (nodeCount, instanceType, groupName)))
 	ami_id = ami_ids[AWS_REGION]
 	image = conn.get_image(ami_id)
 	reservation = image.run(min_count=nodeCount, max_count=nodeCount,
@@ -109,9 +109,9 @@ def addNodes(instanceType, nodeCount, groupName):
 		runningCount = 0
 		for i in reservation.instances:
 			i.update()
-			if i.state == u'running':
+			if i.state == 'running':
 				runningCount += 1
-		print("%i/%i nodes are ready." % (runningCount, nodeCount))
+		print(("%i/%i nodes are ready." % (runningCount, nodeCount)))
 		if runningCount == nodeCount:
 			print("All nodes are running. Note that the actual OS might still take a few minutes")
 			print("until it is fully initialized. Please wait sufficiently long or the following")
@@ -119,7 +119,7 @@ def addNodes(instanceType, nodeCount, groupName):
 			break;
 
 def addSpotNodes(instanceType, nodeCount, maxPrice, groupName):
-	print('Requesting %i spot nodes of type %s (group name = "%s", max. price=%f)..' % (nodeCount, instanceType, groupName, maxPrice))
+	print(('Requesting %i spot nodes of type %s (group name = "%s", max. price=%f)..' % (nodeCount, instanceType, groupName, maxPrice)))
 	ami_id = ami_ids[AWS_REGION]
 	conn.request_spot_instances(str(maxPrice), ami_id, count=nodeCount,
 			instance_type = instanceType, key_name = KEYPAIR_NAME,
@@ -133,7 +133,7 @@ def status():
 	print("Querying spot instance requests...")
 	spotInstances = conn.get_all_spot_instance_requests()
 	for i in spotInstances:
-		print("  %s: status=%s, price must be <= %.3f$" % (i.id, i.state, i.price))
+		print(("  %s: status=%s, price must be <= %.3f$" % (i.id, i.state, i.price)))
 	print("")
 	print("Querying instances ...")
 	reservations = conn.get_all_instances()
@@ -156,7 +156,7 @@ def status():
 			nodesByGroup[group] += ["  %s is %s (type: %s, running for: %id %ih %im, internal IP: %s%s)" % (i.public_dns_name, i.state, i.instance_type,
 				delta.days, hours, minutes, i.private_ip_address, spot_str)]
 	for g in nodesByGroup:
-		print('Nodes in group "%s"' % g)
+		print(('Nodes in group "%s"' % g))
 		print('===================')
 		for n in nodesByGroup[g]:
 			print(n)
@@ -165,24 +165,24 @@ def terminate(name):
 	reservations = conn.get_all_instances()
 	instances = [i for r in reservations for i in r.instances]
 	for i in instances:
-		if i.state == u'running' and i.public_dns_name == name:
-			print("Stopping node %s .." % i.public_dns_name)
+		if i.state == 'running' and i.public_dns_name == name:
+			print(("Stopping node %s .." % i.public_dns_name))
 			i.terminate()
 			return
 	print('Node could not be found or is not running')
 
 
 def terminateAll(groupName):
-	print('Terminating all nodes in group \"%s\" ..' % groupName)
+	print(('Terminating all nodes in group \"%s\" ..' % groupName))
 	reservations = conn.get_all_instances()
 	instances = [i for r in reservations for i in r.instances]
 	for i in instances:
-		if i.state == u'running' and getGroup(i) == groupName:
-			print("Stopping node %s .." % i.public_dns_name)
+		if i.state == 'running' and getGroup(i) == groupName:
+			print(("Stopping node %s .." % i.public_dns_name))
 			i.terminate()
 
 def cancelSpot(id):
-	print('Terminating spot request \"%s\" ..' % id)
+	print(('Terminating spot request \"%s\" ..' % id))
 	result = conn.cancel_spot_instance_requests([id])
 	for n in result:
 		if n.spot_instance_request_id == id:
@@ -198,13 +198,13 @@ def cancelAllSpot():
 			cancelSpot(i.id)
 
 def install(groupName):
-	print('Installing Mitsuba on all nodes of group "%s" ..' % groupName)
+	print(('Installing Mitsuba on all nodes of group "%s" ..' % groupName))
 	reservations = conn.get_all_instances()
 	instances = [i for r in reservations for i in r.instances]
 	processes = []
 	for i in instances:
-		if i.state == u'running' and getGroup(i) == groupName:
-			print("Sending command to node %s" % i.public_dns_name)
+		if i.state == 'running' and getGroup(i) == groupName:
+			print(("Sending command to node %s" % i.public_dns_name))
 			processes += [remoteAdminCommand(i.public_dns_name, 'echo \"%s\" > /etc/apt/sources.list.d/mitsuba.list; dpkg --purge mitsuba; apt-get clean; export DEBIAN_FRONTEND=noninteractive; apt-get update; apt-get -q -y --allow-unauthenticated install mitsuba s3cmd; chown ubuntu /mnt' % PKG_REPOSITORY)]
 	while True:
 		doneCount = 0
@@ -212,18 +212,18 @@ def install(groupName):
 		for p in processes:
 			if p.poll() != None:
 				doneCount += 1
-		print("%i/%i nodes are ready." % (doneCount, len(processes)))
+		print(("%i/%i nodes are ready." % (doneCount, len(processes))))
 		if doneCount == len(processes):
 			print("All nodes are ready.")
 			break;
 
 def systemLoad(groupName):
-	print('Querying system load on all nodes of group "%s" ..' % groupName)
+	print(('Querying system load on all nodes of group "%s" ..' % groupName))
 	reservations = conn.get_all_instances()
 	instances = [i for r in reservations for i in r.instances]
 	processes = []
 	for i in instances:
-		if i.state == u'running' and getGroup(i) == groupName:
+		if i.state == 'running' and getGroup(i) == groupName:
 			processes += [remoteCommand(i.public_dns_name, 'echo `cat /proc/loadavg | cut --delimiter=" " --fields=1-3`  --  `ec2metadata --public-hostname`', False)]
 	while True:
 		doneCount = 0
@@ -236,13 +236,13 @@ def systemLoad(groupName):
 			break;
 
 def runCommand(cmd, groupName):
-	print('Executing command "%s" on all nodes of group "%s" ..' % (cmd, groupName))
+	print(('Executing command "%s" on all nodes of group "%s" ..' % (cmd, groupName)))
 	reservations = conn.get_all_instances()
 	instances = [i for r in reservations for i in r.instances]
 	processes = []
 	for i in instances:
-		if i.state == u'running' and getGroup(i) == groupName:
-			print("Sending command to node %s" % i.public_dns_name)
+		if i.state == 'running' and getGroup(i) == groupName:
+			print(("Sending command to node %s" % i.public_dns_name))
 			processes += [remoteCommand(i.public_dns_name, cmd, False)]
 	while True:
 		doneCount = 0
@@ -255,13 +255,13 @@ def runCommand(cmd, groupName):
 			break;
 
 def syncData(prefix, groupName):
-	print('Fetching S3 prefix "%s/%s" on all nodes of the group "%s" ..' % (S3_PATH, prefix, groupName))
+	print(('Fetching S3 prefix "%s/%s" on all nodes of the group "%s" ..' % (S3_PATH, prefix, groupName)))
 	reservations = conn.get_all_instances()
 	instances = [i for r in reservations for i in r.instances]
 	processes = []
 	for i in instances:
-		if i.state == u'running' and getGroup(i) == groupName:
-			print("Sending command to node %s" % i.public_dns_name)
+		if i.state == 'running' and getGroup(i) == groupName:
+			print(("Sending command to node %s" % i.public_dns_name))
 			os.system('scp -i %s -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o StrictHostKeyChecking=no -q .s3cfg ubuntu@%s:' % (SSH_PRIVATE_KEY_FILE, i.public_dns_name))
 			processes += [remoteCommand(i.public_dns_name, 'cd /mnt; s3cmd sync %s/%s .' % (S3_PATH, prefix))]
 	while True:
@@ -270,20 +270,20 @@ def syncData(prefix, groupName):
 		for p in processes:
 			if p.poll() != None:
 				doneCount += 1
-		print("%i/%i nodes are ready." % (doneCount, len(processes)))
+		print(("%i/%i nodes are ready." % (doneCount, len(processes))))
 		if doneCount == len(processes):
 			print("All nodes are ready.")
 			break;
 
 def start(groupName):
-	print('Creating a Mitsuba cluster using the nodes of group "%s"' % groupName)
+	print(('Creating a Mitsuba cluster using the nodes of group "%s"' % groupName))
 	reservations = conn.get_all_instances()
 	instances = [i for r in reservations for i in r.instances]
 	activeNodes = []
 	activeNodeIPs = []
 	processes = []
 	for i in instances:
-		if i.state == u'running' and getGroup(i) == groupName:
+		if i.state == 'running' and getGroup(i) == groupName:
 			activeNodes += [i.public_dns_name]
 			activeNodeIPs += [i.private_ip_address]
 	if len(activeNodes) == 0:
@@ -293,7 +293,7 @@ def start(groupName):
 	list.remove(activeNodes, headNode)
 	list.remove(activeNodeIPs, activeNodeIPs[len(activeNodeIPs)-1])
 	for i in range(0, len(activeNodes)):
-			print("Sending command to node %s" % activeNodes[i])
+			print(("Sending command to node %s" % activeNodes[i]))
 			processes += [remoteCommand(activeNodes[i], 'killall --quiet mtssrv; cd /mnt; nohup mtssrv -vq >/dev/null >&1 &')]
 	connArgument = str.join(';', activeNodeIPs)
 	if len(connArgument) > 0:
@@ -304,14 +304,14 @@ def start(groupName):
 		for p in processes:
 			if p.poll() != None:
 				doneCount += 1
-		print("%i/%i nodes are ready." % (doneCount, len(processes)))
+		print(("%i/%i nodes are ready." % (doneCount, len(processes))))
 		if doneCount == len(processes):
 			print("All nodes are ready.")
 			break;
 	print("Creating head node ..")
 	p = remoteCommand(headNode, 'killall --quiet mtssrv; cd /mnt; let pcount=`grep processor /proc/cpuinfo | wc -l`; let pcount=`perl -e "use POSIX qw/ceil/; print $pcount-2 < 1 ? 1 : $pcount-2"`; nohup mtssrv -p$pcount -vq %s >/dev/null >&1 &' % connArgument)
 	p.wait()
-	print('Done -- you can specify the head node "%s" in the Mitsuba network rendering dialog' % headNode)
+	print(('Done -- you can specify the head node "%s" in the Mitsuba network rendering dialog' % headNode))
 
 def spotPrices(instanceType):
 	start = datetime.datetime.now()
@@ -326,7 +326,7 @@ def spotPrices(instanceType):
 
 	for h in history:
 		timestamp, tz = parse_timestamp(h.timestamp)
-		print ("%s => %.5f dollars" % (timestamp, h.price))
+		print(("%s => %.5f dollars" % (timestamp, h.price)))
 
 def login(name):
 	os.system('ssh -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o StrictHostKeyChecking=no -i %s ubuntu@%s' % (SSH_PRIVATE_KEY_FILE, name))
@@ -505,6 +505,6 @@ elif sys.argv[1] == 'runCommand':
 		print('runCommand: Invalid number of arguments!')
 elif sys.argv[1] == 'regions':
 	for r in conn.get_all_regions():
-		print(r.name)
+		print((r.name))
 else:
 	print('Unsupported command (run without parameters for an overview)!')

@@ -20,7 +20,7 @@ def extract(target, filename):
 	for line in f.readlines():
 		match = re.match(r'^/\*! ?(.*)$', line)
 		if match != None:
-			print("Processing %s" % filename)
+			print(("Processing %s" % filename))
 			line = match.group(1).replace('%', '\%')
 			target.write(line + '\n')
 			inheader = True
@@ -73,7 +73,7 @@ def texify(texfile):
 	# Call decode() to convert from bytes to string, required in Python 3
 	if re.match('.*MiKTeX.*', version.decode()):
 		# MiKTeX's "texify" calls latex/bibtex in tandem automatically
-		print("Running texify on {0}...".format(texfile))
+		print(("Running texify on {0}...".format(texfile)))
 		check_call(['texify', '-pq', texfile])
 	else:
 		check_call(['pdflatex', texfile])

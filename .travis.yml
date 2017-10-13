@@ -26,11 +26,7 @@ matrix:
         # Print XCode SDK path
         - xcrun --show-sdk-path
       script:
-        # https://github.com/mitsuba-renderer/mitsuba/issues/33
-        # /dev/null avoids polluting Travis log
-        - 2to3 -w ./build/SConscript.install > /dev/null
-        - 2to3 -w ./build/SConscript.configure > /dev/null
-        - scons -j2 --cfg=build/config-macos10.12-clang-x86_64-travis.py
+        - scons -j1 --cfg=build/config-macos10.12-clang-x86_64-travis.py --debug=stacktrace
       after_failure:
         # Poor man's send to S3
         - cat config.log
@@ -38,8 +34,6 @@ matrix:
       dist: trusty
       addons:
         apt:
-          sources:
-            - ubuntu-toolchain-r-test
           packages:
             # See manual, doc/compiling.tex
             - libpng12-dev
@@ -57,6 +51,14 @@ matrix:
             - qt5-default
             - libqt5opengl5-dev
             - libqt5xmlpatterns5-dev
+      before_install:
+        # Travis doesn't obey the `python` key when the project isn't pythonesque
+        - pyenv install 3.6.2
+        - pyenv local 3.6.2
+        - pip install -U setuptools
+        - pip install wheel
+        - pip install scons
+        - scons --version
       script:
         # More than 1 job crashes travis when building python bindings
-        scons -j1 --cfg=build/config-linux-gcc-debug.py
+        scons -j1 --cfg=build/config-linux-gcc-debug.py --debug=stacktrace

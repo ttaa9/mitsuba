@@ -21,7 +21,7 @@ before_build:
   - git clone https://github.com/mitsuba-renderer/dependencies_win64 dependencies
   - pip install -U setuptools
   - pip install pypiwin32 wheel
-  - pip install scons==2.5.1
+  - pip install scons
   - scons --version
 
 build:
