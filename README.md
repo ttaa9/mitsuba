@@ -1,22 +1,51 @@
-Mitsuba — Physically Based Renderer
-===================================
 
-http://mitsuba-renderer.org/
+This is just to tie me over until `mitsuba2` has a GUI.
 
-## About
+This (below) worked with Amy Spark's `hacktoberfest-linux-again` branch.
+However, it had issues reading in my XMLs via `mtsgui`.
+This seems to have been fixed by merging in subsequent updates from the main github's master branch.
 
-Mitsuba is a research-oriented rendering system in the style of PBRT, from which it derives much inspiration. It is written in portable C++, implements unbiased as well as biased techniques, and contains heavy optimizations targeted towards current CPU architectures. Mitsuba is extremely modular: it consists of a small set of core libraries and over 100 different plugins that implement functionality ranging from materials and light sources to complete rendering algorithms.
+Go to one of these repos:
 
-In comparison to other open source renderers, Mitsuba places a strong emphasis on experimental rendering techniques, such as path-based formulations of Metropolis Light Transport and volumetric modeling approaches. Thus, it may be of genuine interest to those who would like to experiment with such techniques that haven't yet found their way into mainstream renderers, and it also provides a solid foundation for research in this domain.
+https://github.com/mitsuba-renderer/mitsuba
 
-The renderer currently runs on Linux, MacOS X and Microsoft Windows and makes use of SSE2 optimizations on x86 and x86_64 platforms. So far, its main use has been as a testbed for algorithm development in computer graphics, but there are many other interesting applications.
+https://github.com/amyspark/mitsuba
 
-Mitsuba comes with a command-line interface as well as a graphical frontend to interactively explore scenes. While navigating, a rough preview is shown that becomes increasingly accurate as soon as all movements are stopped. Once a viewpoint has been chosen, a wide range of rendering techniques can be used to generate images, and their parameters can be tuned from within the program.
 
-## Documentation
+### Install on Ubuntu 18.04
 
-For compilation, usage, and a full plugin reference, please see the [official documentation](http://mitsuba-renderer.org/docs.html).
+Install prerequisites.
 
-## Releases and scenes
+```
+sudo apt-get install build-essential scons git libpng-dev libjpeg-dev libilmbase-dev libxerces-c-dev libboost-all-dev libopenexr-dev libglewmx-dev libxxf86vm-dev libeigen3-dev libfftw3-dev
+```
 
-Pre-built binaries, as well as example scenes, are available on the [Mitsuba website](http://mitsuba-renderer.org/download.html).
+```
+sudo apt-get install libcollada-dom-dev
+```
+
+```
+sudo apt-get install qt5-default libqt5opengl5-dev libqt5xmlpatterns5-dev
+```
+
+Move the config file next.
+Now, I've put `config.py` for ubuntu 18.04 here already, so this should be unnecessary, but for reference:
+
+```
+cp build/config-linux-gcc.py .
+mv config-linux-gcc.py config.py
+```
+
+Change `-std=c++11` to `-std=gnu++11` in `config.py`
+
+Attempt to build and compile:
+
+`QT_SELECT=qt5 scons -j4`
+
+You need to run `source setpath.sh` to run `mtsgui` now.
+
+### Issues with Running
+
+It attempts to convert scene xmls from v0.4 to v0.6, despite the xml clearly BEING labelled as 0.6.
+This causes a segfault. Sometimes. Seemingly fixed by subsequent merge from main repo.
+ 
