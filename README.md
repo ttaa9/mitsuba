@@ -4,8 +4,9 @@ This is just to tie me over until `mitsuba2` has a GUI.
 This (below) worked with Amy Spark's `hacktoberfest-linux-again` branch.
 However, it had issues reading in my XMLs via `mtsgui`.
 This seems to have been fixed by merging in subsequent updates from the main github's master branch.
+It should work to use the `master` branch from this fork.
 
-Go to one of these repos:
+For proper repos, go to one of these places:
 
 https://github.com/mitsuba-renderer/mitsuba
 
